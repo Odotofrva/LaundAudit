@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WASH AUDIT</title>
+  <style>
+    :root {
+      --bg: #eef6ff;
+      --panel: #ffffff;
+      --panel-2: #f8fbff;
+      --ink: #14213d;
+      --muted: #64748b;
+      --line: #d8e2ef;
+      --brand: #1d4ed8;
+      --brand-2: #0ea5e9;
+      --good: #15803d;
+      --warn: #b45309;
+      --bad: #b91c1c;
+      --shadow: 0 18px 48px rgba(20, 33, 61, .12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, .20), transparent 35rem),
+        radial-gradient(circle at bottom right, rgba(29, 78, 216, .14), transparent 35rem),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    .app-shell {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 60px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      padding: clamp(24px, 4vw, 44px);
+      background:
+        linear-gradient(135deg, rgba(20, 33, 61, .96), rgba(29, 78, 216, .88)),
+        var(--ink);
+      color: white;
+      box-shadow: var(--shadow);
+      min-height: 250px;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -80px -110px auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.18), transparent 65%);
+    }
+
+    .bubble-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,.78);
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      margin-bottom: 14px;
+    }
+
+    .bubble-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.16);
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 6vw, 4.75rem);
+      line-height: .95;
+      letter-spacing: -.06em;
+    }
+
+    .hero p {
+      margin: 18px 0 0;
+      color: rgba(255,255,255,.83);
+      max-width: 720px;
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      line-height: 1.6;
+    }
+
+    .status-card {
+      border-radius: 30px;
+      padding: 24px;
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.78);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      display: grid;
+      align-content: space-between;
+      gap: 18px;
+    }
+
+    .date-pill {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #075985;
+      font-weight: 800;
+      font-size: .88rem;
+    }
+
+    .gm-box {
+      padding: 18px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+    }
+
+    .gm-box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+
+    .gm-box p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 22px rgba(29, 78, 216, .22);
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+      min-height: 44px;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 26px rgba(29, 78, 216, .28); }
+    .btn:active { transform: translateY(0); }
+    .btn.secondary {
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .btn.danger {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+    .btn.small {
+      min-height: auto;
+      padding: 8px 10px;
+      border-radius: 11px;
+      font-size: .86rem;
+    }
+
+    .tab-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      margin: 0 0 18px;
+      overflow-x: auto;
+      background: rgba(238, 246, 255, .82);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(216, 226, 239, .8);
+      border-radius: 20px;
+    }
+
+    .tab-btn {
+      white-space: nowrap;
+      border: 1px solid transparent;
+      cursor: pointer;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+      transition: background .18s ease, color .18s ease, border .18s ease;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--brand);
+      border-color: var(--line);
+      box-shadow: 0 8px 18px rgba(20, 33, 61, .06);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(216, 226, 239, .95);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px rgba(20, 33, 61, .08);
+      padding: 18px;
+    }
+
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-title h2, .section-title h3 {
+      margin: 0;
+      letter-spacing: -.03em;
+    }
+
+    .section-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: .94rem;
+    }
+
+    .kpi-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 145px;
+    }
+
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      top: -28px;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(14, 165, 233, .12);
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-weight: 850;
+      font-size: .84rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .kpi-value {
+      margin-top: 8px;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 950;
+      letter-spacing: -.05em;
+    }
+
+    .kpi-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.35;
+    }
+
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: .8rem;
+      background: #f1f5f9;
+      color: var(--muted);
+    }
+    .trend.good { background: #dcfce7; color: var(--good); }
+    .trend.bad { background: #fee2e2; color: var(--bad); }
+    .trend.warn { background: #ffedd5; color: var(--warn); }
+
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .field { grid-column: span 4; }
+    .field.span-2 { grid-column: span 2; }
+    .field.span-3 { grid-column: span 3; }
+    .field.span-6 { grid-column: span 6; }
+    .field.span-8 { grid-column: span 8; }
+    .field.span-12 { grid-column: span 12; }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: #334155;
+      font-weight: 850;
+      font-size: .9rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      background: #ffffff;
+      color: var(--ink);
+      outline: none;
+      min-height: 46px;
+      transition: border .18s ease, box-shadow .18s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(29, 78, 216, .62);
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, .10);
+    }
+
+    textarea {
+      min-height: 98px;
+      resize: vertical;
+    }
+
+    .help {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.35;
+    }
+
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+    }
+
+    th, td {
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: .92rem;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 8px;
+      background: #e0f2fe;
+      color: #075985;
+      font-weight: 900;
+      font-size: .78rem;
+    }
+    .tag.good { background: #dcfce7; color: #166534; }
+    .tag.warn { background: #ffedd5; color: #9a3412; }
+    .tag.bad { background: #fee2e2; color: #991b1b; }
+
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .plan-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: white;
+    }
+
+    .plan-card h3 {
+      margin: 0 0 6px;
+      letter-spacing: -.03em;
+    }
+
+    .plan-card .focus {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid #edf2f7;
+      color: #334155;
+      line-height: 1.35;
+    }
+
+    .check-item input {
+      width: 18px;
+      min-height: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--brand);
+    }
+
+    .progress-bar {
+      overflow: hidden;
+      height: 12px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      margin: 12px 0 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      border-radius: inherit;
+      transition: width .3s ease;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .metric-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+    }
+
+    .metric-row span:first-child {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .metric-row strong {
+      text-align: right;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 40;
+      min-width: min(360px, calc(100vw - 36px));
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #14213d;
+      color: white;
+      box-shadow: var(--shadow);
+      transform: translateY(30px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      font-weight: 800;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-stack {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1050px) {
+      .hero { grid-template-columns: 1fr; }
+      .span-8, .span-6, .span-4, .span-3 { grid-column: span 12; }
+      .plan-grid { grid-template-columns: 1fr; }
+      .field, .field.span-2, .field.span-3, .field.span-6, .field.span-8 { grid-column: span 12; }
+    }
+
+    @media (max-width: 640px) {
+      .app-shell {
+        width: min(100% - 20px, 1440px);
+        padding-top: 10px;
+      }
+      .hero-card, .status-card, .card {
+        border-radius: 20px;
+      }
+      .hero-card {
+        min-height: auto;
+        padding: 24px;
+      }
+      .tab-bar {
+        border-radius: 16px;
+        margin-left: -2px;
+        margin-right: -2px;
+      }
+      .tab-btn {
+        padding: 10px 12px;
+      }
+      .top-actions, .inline-actions {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+      .section-title {
+        flex-direction: column;
+      }
+      .chart-wrap {
+        height: 260px;
+      }
+      table {
+        min-width: 700px;
+      }
+    }
+
+    @media print {
+      body { background: white; }
+      .tab-bar, .top-actions, .inline-actions, .btn, .delete-btn, input[type="file"] { display: none !important; }
+      .tab-panel { display: block !important; page-break-after: always; }
+      .card, .hero-card, .status-card { box-shadow: none; border: 1px solid #ddd; }
+      .hero { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="bubble-line"><span class="bubble-icon">🫧</span> Assistant Manager Growth System</div>
+        <h1>30-60-90 Audit</h1>
+        <p>Track customers, revenue, refunds, machine issues, cleaning scores, complaints, inventory, and 30/60/90 progress so you can show measurable leadership.</p>
+      </div>
+
+      <aside class="status-card">
+        <div>
+          <span class="date-pill" id="todayPill">Today</span>
+        </div>
+        <div class="gm-box">
+          <strong>GM mindset</strong>
+          <p>Every shift, ask: did I make the store cleaner, smoother, safer, more profitable, and more trusted by customers?</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn secondary" id="printBtn">Print Report</button>
+          <button class="btn secondary" id="exportJsonBtn">Export Data</button>
+          <label class="btn secondary" for="importJsonInput" style="display:inline-flex;align-items:center;justify-content:center;">Import Data</label>
+          <input id="importJsonInput" class="hidden" type="file" accept="application/json" />
+        </div>
+      </aside>
+    </section>
+
+    <nav class="tab-bar" aria-label="Dashboard sections">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="daily">Daily Metrics</button>
+      <button class="tab-btn" data-tab="machines">Machine Issues</button>
+      <button class="tab-btn" data-tab="feedback">Customer Feedback</button>
+      <button class="tab-btn" data-tab="inventory">Inventory</button>
+      <button class="tab-btn" data-tab="plan">30/60/90 Plan</button>
+      <button class="tab-btn" data-tab="reports">Reports</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="section-grid">
+        <article class="card span-3 kpi-card">
+          <div class="kpi-label">Customers</div>
+          <div class="kpi-value" id="kpiCustomers">0</div>
+          <div class="kpi-note">Last 30 days</div>
+          <div class="trend" id="trendCustomers">No trend yet</div>
+        </article>
+        <article class="card span-3 kpi-card">
+          <div class="kpi-label">Net Revenue</div>
+          <div class="kpi-value" id="kpiNetRevenue">$0</div>
+          <div class="kpi-note">Revenue minus refunds</div>
+          <div class="trend" id="trendRevenue">No trend yet</div>
+        </article>
+        <article class="card span-3 kpi-card">
+          <div class="kpi-label">Refunds</div>
+          <div class="kpi-value" id="kpiRefunds">$0</div>
+          <div class="kpi-note">Money returned to customers</div>
+          <div class="trend warn" id="trendRefunds">Track every reason</div>
+        </article>
+        <article class="card span-3 kpi-card">
+          <div class="kpi-label">Cleanliness</div>
+          <div class="kpi-value" id="kpiCleanScore">0%</div>
+          <div class="kpi-note">Average score</div>
+          <div class="trend" id="trendClean">No trend yet</div>
+        </article>
+
+        <article class="card span-8">
+          <div class="section-title">
+            <div>
+              <h2>Customer Traffic</h2>
+              <p>Daily customer count for the last 14 tracked days.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="customersChart"></canvas></div>
+        </article>
+
+        <article class="card span-4">
+          <div class="section-title">
+            <div>
+              <h2>Manager Snapshot</h2>
+              <p>Use this as your weekly talking points.</p>
+            </div>
+          </div>
+          <div class="metric-list">
+            <div class="metric-row"><span>Wash & Fold Orders</span><strong id="snapWf">0</strong></div>
+            <div class="metric-row"><span>Complaints</span><strong id="snapComplaints">0</strong></div>
+            <div class="metric-row"><span>Machine Issues</span><strong id="snapMachineIssues">0</strong></div>
+            <div class="metric-row"><span>Downtime Hours</span><strong id="snapDowntime">0</strong></div>
+            <div class="metric-row"><span>Supplies Low</span><strong id="snapSupplies">0</strong></div>
+          </div>
+        </article>
+
+        <article class="card span-6">
+          <div class="section-title">
+            <div>
+              <h2>Revenue vs Refunds</h2>
+              <p>Compare daily revenue to money lost through refunds.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+        </article>
+
+        <article class="card span-6">
+          <div class="section-title">
+            <div>
+              <h2>Machine Downtime</h2>
+              <p>Spot repeat machines that may be costing the business money.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="machineChart"></canvas></div>
+        </article>
+
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Leadership Recommendations</h2>
+              <p>Auto-generated from your data.</p>
+            </div>
+          </div>
+          <div id="recommendations" class="metric-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="daily" class="tab-panel">
+      <div class="section-grid">
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Daily Shift Metrics</h2>
+              <p>Enter the numbers that show growth, service quality, and operations.</p>
+            </div>
+          </div>
+
+          <form id="dailyForm" class="form-grid">
+            <div class="field span-3">
+              <label for="dailyDate">Date</label>
+              <input id="dailyDate" type="date" required />
+            </div>
+            <div class="field span-3">
+              <label for="dailyShift">Shift</label>
+              <select id="dailyShift">
+                <option>Morning</option>
+                <option>Afternoon</option>
+                <option>Evening</option>
+                <option>Overnight</option>
+                <option>Full Day</option>
+              </select>
+            </div>
+            <div class="field span-2">
+              <label for="customers">Customers</label>
+              <input id="customers" type="number" min="0" value="0" />
+            </div>
+            <div class="field span-2">
+              <label for="newCustomers">New Customers</label>
+              <input id="newCustomers" type="number" min="0" value="0" />
+            </div>
+            <div class="field span-2">
+              <label for="repeatCustomers">Repeat Customers</label>
+              <input id="repeatCustomers" type="number" min="0" value="0" />
+            </div>
+
+            <div class="field span-3">
+              <label for="revenue">Total Revenue</label>
+              <input id="revenue" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="washFoldOrders">Wash & Fold Orders</label>
+              <input id="washFoldOrders" type="number" min="0" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="vendingSales">Vending / Product Sales</label>
+              <input id="vendingSales" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="refunds">Refunds Given</label>
+              <input id="refunds" type="number" min="0" step="0.01" value="0" />
+            </div>
+
+            <div class="field span-3">
+              <label for="complaintCount">Complaint Count</label>
+              <input id="complaintCount" type="number" min="0" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="machineIssueCount">Machine Issue Count</label>
+              <input id="machineIssueCount" type="number" min="0" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="downtimeHours">Downtime Hours</label>
+              <input id="downtimeHours" type="number" min="0" step="0.25" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="cleanScore">Cleaning Score</label>
+              <input id="cleanScore" type="number" min="0" max="100" value="90" />
+              <div class="help">Use 0-100. Example: 90 = strong, 70 = needs attention.</div>
+            </div>
+
+            <div class="field span-6">
+              <label for="peakHours">Peak Hours</label>
+              <input id="peakHours" placeholder="Example: 10 AM - 2 PM" />
+            </div>
+            <div class="field span-6">
+              <label for="staffOnDuty">Staff On Duty</label>
+              <input id="staffOnDuty" placeholder="Example: Orion, Maria" />
+            </div>
+            <div class="field span-12">
+              <label for="dailyNotes">Shift Notes / Recommendations</label>
+              <textarea id="dailyNotes" placeholder="What happened today that affected money, machines, customers, staff, or cleanliness?"></textarea>
+            </div>
+            <div class="field span-12">
+              <div class="inline-actions">
+                <button class="btn" type="submit">Save Daily Metrics</button>
+                <button class="btn secondary" type="button" id="resetDailyForm">Reset Form</button>
+              </div>
+            </div>
+          </form>
+        </article>
+
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Recent Daily Entries</h2>
+              <p>Your most recent shift reports.</p>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="dailyTable"></table></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="machines" class="tab-panel">
+      <div class="section-grid">
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Machine Issue Log</h2>
+              <p>Track problem machines so you can prove downtime, refunds, and repeated issues.</p>
+            </div>
+          </div>
+          <form id="machineForm" class="form-grid">
+            <div class="field span-3">
+              <label for="machineDate">Date</label>
+              <input id="machineDate" type="date" required />
+            </div>
+            <div class="field span-3">
+              <label for="machineId">Machine Number</label>
+              <input id="machineId" placeholder="Example: Washer 12" required />
+            </div>
+            <div class="field span-3">
+              <label for="machineType">Type</label>
+              <select id="machineType">
+                <option>Washer</option>
+                <option>Dryer</option>
+                <option>Coin Machine</option>
+                <option>Card System</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label for="machineStatus">Status</label>
+              <select id="machineStatus">
+                <option>Reported</option>
+                <option>Out of Service</option>
+                <option>Resolved</option>
+                <option>Needs Tech</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label for="machineDowntime">Downtime Hours</label>
+              <input id="machineDowntime" type="number" min="0" step="0.25" value="0" />
+            </div>
+            <div class="field span-3">
+              <label for="machineRefund">Refund Amount</label>
+              <input id="machineRefund" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div class="field span-6">
+              <label for="machineIssue">Issue</label>
+              <input id="machineIssue" placeholder="Example: Did not drain, not heating, card reader error" />
+            </div>
+            <div class="field span-12">
+              <label for="machineAction">Action Taken</label>
+              <textarea id="machineAction" placeholder="Tagged out, reset machine, called tech, moved customer, gave refund..."></textarea>
+            </div>
+            <div class="field span-12">
+              <button class="btn" type="submit">Save Machine Issue</button>
+            </div>
+          </form>
+        </article>
+
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Machine Issue Records</h2>
+              <p>Use this to speak clearly with the owner or repair technician.</p>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="machineTable"></table></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="feedback" class="tab-panel">
+      <div class="section-grid">
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Customer Feedback & Complaints</h2>
+              <p>Complaints are data. Track patterns and resolutions.</p>
+            </div>
+          </div>
+          <form id="feedbackForm" class="form-grid">
+            <div class="field span-3">
+              <label for="feedbackDate">Date</label>
+              <input id="feedbackDate" type="date" required />
+            </div>
+            <div class="field span-3">
+              <label for="feedbackType">Type</label>
+              <select id="feedbackType">
+                <option>Complaint</option>
+                <option>Positive Feedback</option>
+                <option>Question</option>
+                <option>Suggestion</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label for="feedbackCategory">Category</label>
+              <select id="feedbackCategory">
+                <option>Machine</option>
+                <option>Refund</option>
+                <option>Cleanliness</option>
+                <option>Staff</option>
+                <option>Wait Time</option>
+                <option>Wash & Fold</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field span-3">
+              <label for="feedbackResolved">Resolved?</label>
+              <select id="feedbackResolved">
+                <option>Yes</option>
+                <option>No</option>
+                <option>Follow Up Needed</option>
+              </select>
+            </div>
+            <div class="field span-6">
+              <label for="feedbackSummary">Summary</label>
+              <textarea id="feedbackSummary" placeholder="What did the customer say?"></textarea>
+            </div>
+            <div class="field span-6">
+              <label for="feedbackResolution">Resolution</label>
+              <textarea id="feedbackResolution" placeholder="What did you do to solve it?"></textarea>
+            </div>
+            <div class="field span-12">
+              <button class="btn" type="submit">Save Feedback</button>
+            </div>
+          </form>
+        </article>
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Feedback Records</h2>
+              <p>Review service patterns and repeat complaints.</p>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="feedbackTable"></table></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="inventory" class="tab-panel">
+      <div class="section-grid">
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Inventory & Supply Tracker</h2>
+              <p>Track low supplies before they become customer experience problems.</p>
+            </div>
+          </div>
+          <form id="inventoryForm" class="form-grid">
+            <div class="field span-3">
+              <label for="inventoryDate">Date</label>
+              <input id="inventoryDate" type="date" required />
+            </div>
+            <div class="field span-3">
+              <label for="itemName">Item</label>
+              <input id="itemName" placeholder="Example: Trash bags" required />
+            </div>
+            <div class="field span-2">
+              <label for="itemQty">Quantity</label>
+              <input id="itemQty" type="number" min="0" step="1" value="0" />
+            </div>
+            <div class="field span-2">
+              <label for="itemStatus">Status</label>
+              <select id="itemStatus">
+                <option>In Stock</option>
+                <option>Low</option>
+                <option>Out</option>
+                <option>Ordered</option>
+              </select>
+            </div>
+            <div class="field span-2">
+              <label for="itemPriority">Priority</label>
+              <select id="itemPriority">
+                <option>Normal</option>
+                <option>High</option>
+                <option>Critical</option>
+              </select>
+            </div>
+            <div class="field span-12">
+              <label for="inventoryNotes">Notes</label>
+              <textarea id="inventoryNotes" placeholder="Restock notes, vendor notes, or suggested reorder amount."></textarea>
+            </div>
+            <div class="field span-12">
+              <button class="btn" type="submit">Save Inventory Item</button>
+            </div>
+          </form>
+        </article>
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Inventory Records</h2>
+              <p>Use this for weekly restock conversations.</p>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="inventoryTable"></table></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="plan" class="tab-panel">
+      <div class="section-grid">
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>30 / 60 / 90 Day Growth Plan</h2>
+              <p>Check off what you complete. This becomes proof that you are building GM-level systems.</p>
+            </div>
+            <button class="btn secondary" id="resetPlanBtn">Reset Plan</button>
+          </div>
+          <div class="plan-grid" id="planGrid"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="reports" class="tab-panel">
+      <div class="section-grid">
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h2>Reports & Data</h2>
+              <p>Filter, export, and review your records.</p>
+            </div>
+            <div class="mobile-stack">
+              <select id="rangeFilter" aria-label="Date range filter">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="60">Last 60 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="all">All time</option>
+              </select>
+              <button class="btn secondary small" id="exportCsvBtn">Export CSV</button>
+              <button class="btn danger small" id="clearAllBtn">Clear All Data</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card span-6">
+          <div class="section-title">
+            <div>
+              <h3>Filtered KPI Summary</h3>
+              <p>Quick numbers for your selected range.</p>
+            </div>
+          </div>
+          <div class="metric-list" id="filteredSummary"></div>
+        </article>
+
+        <article class="card span-6">
+          <div class="section-title">
+            <div>
+              <h3>Cleaning Score Trend</h3>
+              <p>Average cleanliness by tracked day.</p>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="cleanChart"></canvas></div>
+        </article>
+
+        <article class="card span-12">
+          <div class="section-title">
+            <div>
+              <h3>All Daily Metrics</h3>
+              <p>Filtered by the date range above.</p>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="reportsTable"></table></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script>
+    const STORAGE_KEY = "laundromatGrowthDashboard.v1";
+
+    const state = loadState();
+
+    const planItems = [
+      {
+        id: "30",
+        title: "First 30 Days",
+        focus: "Learn, observe, document, and build trust.",
+        items: [
+          "Learn opening, closing, refunds, cleaning, and machine issue routines.",
+          "Start daily shift reports for customer count, revenue, refunds, and notes.",
+          "Identify the top repeat machine issues.",
+          "Track common customer complaints and questions.",
+          "Build a simple cleaning checklist standard.",
+          "Learn staff strengths, gaps, and shift patterns."
+        ]
+      },
+      {
+        id: "60",
+        title: "Days 31–60",
+        focus: "Improve systems and reduce repeated problems.",
+        items: [
+          "Use a machine issue log with machine number, downtime, refund, and action.",
+          "Use a weekly inventory and low-stock tracker.",
+          "Track refunds by reason to spot lost-money patterns.",
+          "Create clearer out-of-service tags or customer communication signs.",
+          "Recommend one cleaning improvement and one customer service improvement.",
+          "Help coach or train staff using factual notes."
+        ]
+      },
+      {
+        id: "90",
+        title: "Days 61–90",
+        focus: "Show leadership, results, and GM readiness.",
+        items: [
+          "Present weekly numbers to ownership or management.",
+          "Show trends in customers, revenue, refunds, complaints, and downtime.",
+          "Recommend ways to increase wash-and-fold, vending, or repeat customers.",
+          "Recommend ways to reduce refunds, supply waste, and machine downtime.",
+          "Create a repeatable weekly operations report.",
+          "Ask for more responsibility based on documented results."
+        ]
+      }
+    ];
+
+    function defaultState() {
+      return {
+        daily: [],
+        machines: [],
+        feedback: [],
+        inventory: [],
+        plan: {}
+      };
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? { ...defaultState(), ...JSON.parse(saved) } : defaultState();
+      } catch (error) {
+        console.warn("Could not load saved data", error);
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function todayISO() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function money(value) {
+      const num = Number(value || 0);
+      return num.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    }
+
+    function moneyPrecise(value) {
+      const num = Number(value || 0);
+      return num.toLocaleString(undefined, { style: "currency", currency: "USD" });
+    }
+
+    function num(value, digits = 0) {
+      return Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: digits });
+    }
+
+    function sum(items, key) {
+      return items.reduce((total, item) => total + Number(item[key] || 0), 0);
+    }
+
+    function avg(items, key) {
+      if (!items.length) return 0;
+      return sum(items, key) / items.length;
+    }
+
+    function byDateDesc(a, b) {
+      return String(b.date).localeCompare(String(a.date));
+    }
+
+    function rangeItems(items, days = 30) {
+      if (days === "all") return [...items];
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - Number(days) + 1);
+      cutoff.setHours(0, 0, 0, 0);
+      return items.filter(item => {
+        const date = new Date(item.date + "T00:00:00");
+        return date >= cutoff;
+      });
+    }
+
+    function groupedDaily(days = 14) {
+      const records = rangeItems(state.daily, days).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      const map = {};
+      records.forEach(r => {
+        if (!map[r.date]) map[r.date] = { date: r.date, customers: 0, revenue: 0, refunds: 0, cleanScoreTotal: 0, cleanCount: 0 };
+        map[r.date].customers += Number(r.customers || 0);
+        map[r.date].revenue += Number(r.revenue || 0);
+        map[r.date].refunds += Number(r.refunds || 0);
+        if (r.cleanScore !== "" && r.cleanScore !== undefined) {
+          map[r.date].cleanScoreTotal += Number(r.cleanScore || 0);
+          map[r.date].cleanCount += 1;
+        }
+      });
+      return Object.values(map).map(item => ({
+        ...item,
+        cleanScore: item.cleanCount ? item.cleanScoreTotal / item.cleanCount : 0
+      })).slice(-days);
+    }
+
+    function drawBarChart(canvasId, labels, series, options = {}) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.max(300, rect.width) * ratio;
+      canvas.height = Math.max(220, rect.height) * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+      const width = rect.width;
+      const height = rect.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const padding = { top: 26, right: 18, bottom: 52, left: 52 };
+      const chartW = width - padding.left - padding.right;
+      const chartH = height - padding.top - padding.bottom;
+      const allValues = series.flatMap(s => s.values);
+      const maxValue = Math.max(1, ...allValues) * 1.15;
+
+      ctx.strokeStyle = "#d8e2ef";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#64748b";
+      ctx.font = "12px Inter, system-ui";
+
+      for (let i = 0; i <= 4; i++) {
+        const y = padding.top + chartH - (chartH * i / 4);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+        const label = options.money ? money(maxValue * i / 4).replace(".00", "") : Math.round(maxValue * i / 4);
+        ctx.fillText(label, 8, y + 4);
+      }
+
+      if (!labels.length) {
+        ctx.fillStyle = "#64748b";
+        ctx.font = "700 16px Inter, system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("No data yet. Add your first entry.", width / 2, height / 2);
+        ctx.textAlign = "left";
+        return;
+      }
+
+      const groupW = chartW / labels.length;
+      const barGap = 5;
+      const barsPerGroup = series.length;
+      const barW = Math.max(6, (groupW - 14 - (barGap * (barsPerGroup - 1))) / barsPerGroup);
+      const fills = ["#1d4ed8", "#0ea5e9", "#38bdf8", "#94a3b8"];
+
+      labels.forEach((label, i) => {
+        series.forEach((s, si) => {
+          const value = Number(s.values[i] || 0);
+          const x = padding.left + i * groupW + 7 + si * (barW + barGap);
+          const barH = (value / maxValue) * chartH;
+          const y = padding.top + chartH - barH;
+          ctx.fillStyle = fills[si % fills.length];
+          roundRect(ctx, x, y, barW, barH, 7, true);
+        });
+
+        ctx.save();
+        ctx.translate(padding.left + i * groupW + groupW / 2, height - 24);
+        ctx.rotate(labels.length > 8 ? -Math.PI / 5 : 0);
+        ctx.fillStyle = "#64748b";
+        ctx.font = "11px Inter, system-ui";
+        ctx.textAlign = labels.length > 8 ? "right" : "center";
+        ctx.fillText(shortDate(label), 0, 0);
+        ctx.restore();
+      });
+
+      if (series.length > 1) {
+        let lx = padding.left;
+        series.forEach((s, si) => {
+          ctx.fillStyle = fills[si % fills.length];
+          roundRect(ctx, lx, 8, 12, 12, 4, true);
+          ctx.fillStyle = "#334155";
+          ctx.font = "700 12px Inter, system-ui";
+          ctx.fillText(s.name, lx + 18, 18);
+          lx += ctx.measureText(s.name).width + 48;
+        });
+      }
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill) {
+      const r = Math.min(radius, Math.abs(height) / 2, width / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      if (fill) ctx.fill();
+    }
+
+    function shortDate(dateStr) {
+      if (!dateStr) return "";
+      const [y, m, d] = dateStr.split("-");
+      return `${Number(m)}/${Number(d)}`;
+    }
+
+    function setTrend(elId, current, previous, higherIsGood = true) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (!previous || previous === 0) {
+        el.className = "trend";
+        el.textContent = "Start tracking trend";
+        return;
+      }
+      const change = ((current - previous) / previous) * 100;
+      const isGood = higherIsGood ? change >= 0 : change <= 0;
+      el.className = `trend ${Math.abs(change) < 1 ? "warn" : isGood ? "good" : "bad"}`;
+      el.textContent = `${change >= 0 ? "▲" : "▼"} ${Math.abs(change).toFixed(1)}% vs previous period`;
+    }
+
+    function renderOverview() {
+      const last30 = rangeItems(state.daily, 30);
+      const prev60 = rangeItems(state.daily, 60);
+      const previous30 = prev60.filter(item => !last30.includes(item));
+
+      const customers = sum(last30, "customers");
+      const revenue = sum(last30, "revenue");
+      const refunds = sum(last30, "refunds");
+      const netRevenue = revenue - refunds;
+      const cleanScore = avg(last30.filter(r => r.cleanScore !== undefined), "cleanScore");
+
+      document.getElementById("kpiCustomers").textContent = num(customers);
+      document.getElementById("kpiNetRevenue").textContent = money(netRevenue);
+      document.getElementById("kpiRefunds").textContent = money(refunds);
+      document.getElementById("kpiCleanScore").textContent = `${Math.round(cleanScore)}%`;
+
+      setTrend("trendCustomers", customers, sum(previous30, "customers"), true);
+      setTrend("trendRevenue", netRevenue, sum(previous30, "revenue") - sum(previous30, "refunds"), true);
+      setTrend("trendRefunds", refunds, sum(previous30, "refunds"), false);
+      setTrend("trendClean", cleanScore, avg(previous30.filter(r => r.cleanScore !== undefined), "cleanScore"), true);
+
+      const last30Machines = rangeItems(state.machines, 30);
+      const last30Feedback = rangeItems(state.feedback, 30);
+      const lowSupplies = state.inventory.filter(i => ["Low", "Out"].includes(i.status)).length;
+
+      document.getElementById("snapWf").textContent = num(sum(last30, "washFoldOrders"));
+      document.getElementById("snapComplaints").textContent = num(last30Feedback.filter(f => f.type === "Complaint").length + sum(last30, "complaintCount"));
+      document.getElementById("snapMachineIssues").textContent = num(last30Machines.length + sum(last30, "machineIssueCount"));
+      document.getElementById("snapDowntime").textContent = num(sum(last30Machines, "downtime") + sum(last30, "downtimeHours"), 1);
+      document.getElementById("snapSupplies").textContent = num(lowSupplies);
+
+      const daily = groupedDaily(14);
+      drawBarChart("customersChart", daily.map(d => d.date), [{ name: "Customers", values: daily.map(d => d.customers) }]);
+
+      drawBarChart("revenueChart", daily.map(d => d.date), [
+        { name: "Revenue", values: daily.map(d => d.revenue) },
+        { name: "Refunds", values: daily.map(d => d.refunds) }
+      ], { money: true });
+
+      const machineMap = {};
+      rangeItems(state.machines, 90).forEach(m => {
+        const key = m.machineId || "Unknown";
+        machineMap[key] = (machineMap[key] || 0) + Number(m.downtime || 0);
+      });
+      const machineRows = Object.entries(machineMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      drawBarChart("machineChart", machineRows.map(r => r[0]), [{ name: "Downtime", values: machineRows.map(r => r[1]) }]);
+
+      renderRecommendations(last30, last30Machines, last30Feedback);
+    }
+
+    function renderRecommendations(daily, machines, feedback) {
+      const target = document.getElementById("recommendations");
+      const recs = [];
+
+      const refunds = sum(daily, "refunds") + sum(machines, "refund");
+      if (refunds > 0) recs.push(["Refund Control", `Refunds tracked in this period total ${moneyPrecise(refunds)}. Review the top reasons and connect them to machine numbers or staff decisions.`]);
+
+      const complaints = feedback.filter(f => f.type === "Complaint").length + sum(daily, "complaintCount");
+      if (complaints >= 3) recs.push(["Customer Experience", `${complaints} complaints are recorded. Group them by category and recommend one fix for the most common issue.`]);
+
+      const clean = avg(daily.filter(d => d.cleanScore !== undefined), "cleanScore");
+      if (daily.length && clean < 85) recs.push(["Cleanliness Standard", `Average cleaning score is ${Math.round(clean)}%. Create a tighter bathroom, folding table, floor, and lint-trap checklist.`]);
+
+      const machineCounts = {};
+      machines.forEach(m => machineCounts[m.machineId] = (machineCounts[m.machineId] || 0) + 1);
+      const repeat = Object.entries(machineCounts).filter(([, count]) => count >= 2).sort((a, b) => b[1] - a[1])[0];
+      if (repeat) recs.push(["Maintenance Pattern", `${repeat[0]} has ${repeat[1]} logged issues. Recommend a service call or deeper inspection.`]);
+
+      const wf = sum(daily, "washFoldOrders");
+      if (daily.length && wf === 0) recs.push(["Service Growth", "No wash-and-fold orders were tracked. If the store offers it, start measuring orders, pounds, revenue, and turnaround time."]);
+
+      if (!recs.length) recs.push(["Start Strong", "Add at least one daily entry, one machine issue when it happens, and one inventory check. Your recommendations will get sharper as data grows."]);
+
+      target.innerHTML = recs.map(([title, text]) => `
+        <div class="metric-row">
+          <span>${escapeHtml(title)}</span>
+          <strong style="font-weight:700;text-align:left;">${escapeHtml(text)}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderTables() {
+      renderDailyTable();
+      renderMachineTable();
+      renderFeedbackTable();
+      renderInventoryTable();
+      renderReports();
+    }
+
+    function tableEmpty(colspan, message) {
+      return `<tr><td colspan="${colspan}" class="empty">${message}</td></tr>`;
+    }
+
+    function renderDailyTable() {
+      const rows = [...state.daily].sort(byDateDesc).slice(0, 20);
+      document.getElementById("dailyTable").innerHTML = `
+        <thead>
+          <tr>
+            <th>Date</th><th>Shift</th><th>Customers</th><th>Revenue</th><th>Refunds</th><th>Clean</th><th>Peak Hours</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `
+            <tr>
+              <td>${escapeHtml(r.date)}</td>
+              <td>${escapeHtml(r.shift)}</td>
+              <td>${num(r.customers)}</td>
+              <td>${moneyPrecise(r.revenue)}</td>
+              <td>${moneyPrecise(r.refunds)}</td>
+              <td><span class="tag ${Number(r.cleanScore) >= 85 ? "good" : Number(r.cleanScore) >= 70 ? "warn" : "bad"}">${num(r.cleanScore)}%</span></td>
+              <td>${escapeHtml(r.peakHours || "")}</td>
+              <td>${escapeHtml(r.notes || "")}</td>
+              <td><button class="btn secondary small delete-btn" data-delete="daily" data-id="${r.id}">Delete</button></td>
+            </tr>
+          `).join("") : tableEmpty(9, "No daily entries yet. Add your first shift metrics above.")}
+        </tbody>`;
+    }
+
+    function renderMachineTable() {
+      const rows = [...state.machines].sort(byDateDesc).slice(0, 50);
+      document.getElementById("machineTable").innerHTML = `
+        <thead>
+          <tr>
+            <th>Date</th><th>Machine</th><th>Type</th><th>Status</th><th>Issue</th><th>Downtime</th><th>Refund</th><th>Action</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `
+            <tr>
+              <td>${escapeHtml(r.date)}</td>
+              <td><strong>${escapeHtml(r.machineId)}</strong></td>
+              <td>${escapeHtml(r.type)}</td>
+              <td><span class="tag ${r.status === "Resolved" ? "good" : r.status === "Out of Service" ? "bad" : "warn"}">${escapeHtml(r.status)}</span></td>
+              <td>${escapeHtml(r.issue || "")}</td>
+              <td>${num(r.downtime, 1)} hrs</td>
+              <td>${moneyPrecise(r.refund)}</td>
+              <td>${escapeHtml(r.action || "")}</td>
+              <td><button class="btn secondary small delete-btn" data-delete="machines" data-id="${r.id}">Delete</button></td>
+            </tr>
+          `).join("") : tableEmpty(9, "No machine issues logged yet.")}
+        </tbody>`;
+    }
+
+    function renderFeedbackTable() {
+      const rows = [...state.feedback].sort(byDateDesc).slice(0, 50);
+      document.getElementById("feedbackTable").innerHTML = `
+        <thead>
+          <tr>
+            <th>Date</th><th>Type</th><th>Category</th><th>Resolved</th><th>Summary</th><th>Resolution</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `
+            <tr>
+              <td>${escapeHtml(r.date)}</td>
+              <td><span class="tag ${r.type === "Positive Feedback" ? "good" : r.type === "Complaint" ? "bad" : ""}">${escapeHtml(r.type)}</span></td>
+              <td>${escapeHtml(r.category)}</td>
+              <td>${escapeHtml(r.resolved)}</td>
+              <td>${escapeHtml(r.summary || "")}</td>
+              <td>${escapeHtml(r.resolution || "")}</td>
+              <td><button class="btn secondary small delete-btn" data-delete="feedback" data-id="${r.id}">Delete</button></td>
+            </tr>
+          `).join("") : tableEmpty(7, "No feedback records yet.")}
+        </tbody>`;
+    }
+
+    function renderInventoryTable() {
+      const rows = [...state.inventory].sort(byDateDesc).slice(0, 50);
+      document.getElementById("inventoryTable").innerHTML = `
+        <thead>
+          <tr>
+            <th>Date</th><th>Item</th><th>Qty</th><th>Status</th><th>Priority</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `
+            <tr>
+              <td>${escapeHtml(r.date)}</td>
+              <td><strong>${escapeHtml(r.item)}</strong></td>
+              <td>${num(r.qty)}</td>
+              <td><span class="tag ${r.status === "In Stock" ? "good" : r.status === "Low" ? "warn" : r.status === "Out" ? "bad" : ""}">${escapeHtml(r.status)}</span></td>
+              <td>${escapeHtml(r.priority)}</td>
+              <td>${escapeHtml(r.notes || "")}</td>
+              <td><button class="btn secondary small delete-btn" data-delete="inventory" data-id="${r.id}">Delete</button></td>
+            </tr>
+          `).join("") : tableEmpty(7, "No inventory records yet.")}
+        </tbody>`;
+    }
+
+    function renderReports() {
+      const range = document.getElementById("rangeFilter")?.value || "30";
+      const rows = rangeItems(state.daily, range).sort(byDateDesc);
+      const summary = document.getElementById("filteredSummary");
+      if (summary) {
+        summary.innerHTML = `
+          <div class="metric-row"><span>Customer Count</span><strong>${num(sum(rows, "customers"))}</strong></div>
+          <div class="metric-row"><span>New Customers</span><strong>${num(sum(rows, "newCustomers"))}</strong></div>
+          <div class="metric-row"><span>Repeat Customers</span><strong>${num(sum(rows, "repeatCustomers"))}</strong></div>
+          <div class="metric-row"><span>Revenue</span><strong>${moneyPrecise(sum(rows, "revenue"))}</strong></div>
+          <div class="metric-row"><span>Refunds</span><strong>${moneyPrecise(sum(rows, "refunds"))}</strong></div>
+          <div class="metric-row"><span>Net Revenue</span><strong>${moneyPrecise(sum(rows, "revenue") - sum(rows, "refunds"))}</strong></div>
+          <div class="metric-row"><span>Average Cleaning Score</span><strong>${Math.round(avg(rows, "cleanScore"))}%</strong></div>
+        `;
+      }
+
+      const reportTable = document.getElementById("reportsTable");
+      if (reportTable) {
+        reportTable.innerHTML = `
+          <thead>
+            <tr>
+              <th>Date</th><th>Shift</th><th>Customers</th><th>New</th><th>Repeat</th><th>Revenue</th><th>Vending</th><th>Refunds</th><th>Complaints</th><th>Machine Issues</th><th>Clean</th><th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.length ? rows.map(r => `
+              <tr>
+                <td>${escapeHtml(r.date)}</td>
+                <td>${escapeHtml(r.shift)}</td>
+                <td>${num(r.customers)}</td>
+                <td>${num(r.newCustomers)}</td>
+                <td>${num(r.repeatCustomers)}</td>
+                <td>${moneyPrecise(r.revenue)}</td>
+                <td>${moneyPrecise(r.vendingSales)}</td>
+                <td>${moneyPrecise(r.refunds)}</td>
+                <td>${num(r.complaintCount)}</td>
+                <td>${num(r.machineIssueCount)}</td>
+                <td>${num(r.cleanScore)}%</td>
+                <td>${escapeHtml(r.notes || "")}</td>
+              </tr>
+            `).join("") : tableEmpty(12, "No records for this range.")}
+          </tbody>`;
+      }
+
+      const daily = groupedDaily(range === "all" ? 365 : Number(range));
+      drawBarChart("cleanChart", daily.map(d => d.date), [{ name: "Cleaning Score", values: daily.map(d => d.cleanScore) }]);
+    }
+
+    function renderPlan() {
+      const grid = document.getElementById("planGrid");
+      grid.innerHTML = planItems.map(plan => {
+        const completed = plan.items.filter((_, idx) => state.plan[`${plan.id}-${idx}`]).length;
+        const percent = Math.round((completed / plan.items.length) * 100);
+        return `
+          <div class="plan-card">
+            <h3>${escapeHtml(plan.title)}</h3>
+            <p class="focus">${escapeHtml(plan.focus)}</p>
+            <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
+            <p class="help"><strong>${percent}% complete</strong> — ${completed} of ${plan.items.length} checked</p>
+            ${plan.items.map((item, idx) => {
+              const id = `${plan.id}-${idx}`;
+              return `
+                <label class="check-item">
+                  <input type="checkbox" class="plan-check" data-plan-id="${id}" ${state.plan[id] ? "checked" : ""} />
+                  <span>${escapeHtml(item)}</span>
+                </label>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAll() {
+      renderOverview();
+      renderTables();
+      renderPlan();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function download(filename, text, type = "text/plain") {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function toCsv(rows) {
+      if (!rows.length) return "";
+      const keys = Object.keys(rows[0]);
+      const line = values => values.map(value => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",");
+      return [line(keys), ...rows.map(row => line(keys.map(key => row[key])))].join("\n");
+    }
+
+    function initEvents() {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById(btn.dataset.tab).classList.add("active");
+          setTimeout(renderAll, 60);
+        });
+      });
+
+      document.getElementById("dailyForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.daily.push({
+          id: uid(),
+          date: dailyDate.value,
+          shift: dailyShift.value,
+          customers: Number(customers.value || 0),
+          newCustomers: Number(newCustomers.value || 0),
+          repeatCustomers: Number(repeatCustomers.value || 0),
+          revenue: Number(revenue.value || 0),
+          washFoldOrders: Number(washFoldOrders.value || 0),
+          vendingSales: Number(vendingSales.value || 0),
+          refunds: Number(refunds.value || 0),
+          complaintCount: Number(complaintCount.value || 0),
+          machineIssueCount: Number(machineIssueCount.value || 0),
+          downtimeHours: Number(downtimeHours.value || 0),
+          cleanScore: Number(cleanScore.value || 0),
+          peakHours: peakHours.value.trim(),
+          staffOnDuty: staffOnDuty.value.trim(),
+          notes: dailyNotes.value.trim()
+        });
+        saveState();
+        event.target.reset();
+        setDefaultDates();
+        renderAll();
+        showToast("Daily metrics saved");
+      });
+
+      document.getElementById("resetDailyForm").addEventListener("click", () => {
+        document.getElementById("dailyForm").reset();
+        setDefaultDates();
+      });
+
+      document.getElementById("machineForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.machines.push({
+          id: uid(),
+          date: machineDate.value,
+          machineId: machineId.value.trim(),
+          type: machineType.value,
+          status: machineStatus.value,
+          downtime: Number(machineDowntime.value || 0),
+          refund: Number(machineRefund.value || 0),
+          issue: machineIssue.value.trim(),
+          action: machineAction.value.trim()
+        });
+        saveState();
+        event.target.reset();
+        setDefaultDates();
+        renderAll();
+        showToast("Machine issue saved");
+      });
+
+      document.getElementById("feedbackForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.feedback.push({
+          id: uid(),
+          date: feedbackDate.value,
+          type: feedbackType.value,
+          category: feedbackCategory.value,
+          resolved: feedbackResolved.value,
+          summary: feedbackSummary.value.trim(),
+          resolution: feedbackResolution.value.trim()
+        });
+        saveState();
+        event.target.reset();
+        setDefaultDates();
+        renderAll();
+        showToast("Customer feedback saved");
+      });
+
+      document.getElementById("inventoryForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.inventory.push({
+          id: uid(),
+          date: inventoryDate.value,
+          item: itemName.value.trim(),
+          qty: Number(itemQty.value || 0),
+          status: itemStatus.value,
+          priority: itemPriority.value,
+          notes: inventoryNotes.value.trim()
+        });
+        saveState();
+        event.target.reset();
+        setDefaultDates();
+        renderAll();
+        showToast("Inventory item saved");
+      });
+
+      document.body.addEventListener("click", event => {
+        const btn = event.target.closest("[data-delete]");
+        if (!btn) return;
+        const collection = btn.dataset.delete;
+        const id = btn.dataset.id;
+        if (confirm("Delete this record?")) {
+          state[collection] = state[collection].filter(item => item.id !== id);
+          saveState();
+          renderAll();
+          showToast("Record deleted");
+        }
+      });
+
+      document.body.addEventListener("change", event => {
+        const checkbox = event.target.closest(".plan-check");
+        if (!checkbox) return;
+        state.plan[checkbox.dataset.planId] = checkbox.checked;
+        saveState();
+        renderPlan();
+      });
+
+      document.getElementById("rangeFilter").addEventListener("change", renderReports);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+      document.getElementById("exportJsonBtn").addEventListener("click", () => {
+        download(`laundromat-dashboard-data-${todayISO()}.json`, JSON.stringify(state, null, 2), "application/json");
+      });
+
+      document.getElementById("importJsonInput").addEventListener("change", async event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        try {
+          const imported = JSON.parse(await file.text());
+          const merged = { ...defaultState(), ...imported };
+          state.daily = Array.isArray(merged.daily) ? merged.daily : [];
+          state.machines = Array.isArray(merged.machines) ? merged.machines : [];
+          state.feedback = Array.isArray(merged.feedback) ? merged.feedback : [];
+          state.inventory = Array.isArray(merged.inventory) ? merged.inventory : [];
+          state.plan = merged.plan || {};
+          saveState();
+          renderAll();
+          showToast("Data imported");
+        } catch (error) {
+          alert("Could not import that JSON file.");
+        } finally {
+          event.target.value = "";
+        }
+      });
+
+      document.getElementById("exportCsvBtn").addEventListener("click", () => {
+        const range = document.getElementById("rangeFilter").value;
+        const rows = rangeItems(state.daily, range).sort(byDateDesc);
+        if (!rows.length) {
+          showToast("No daily records to export");
+          return;
+        }
+        download(`laundromat-daily-metrics-${todayISO()}.csv`, toCsv(rows), "text/csv");
+      });
+
+      document.getElementById("clearAllBtn").addEventListener("click", () => {
+        if (!confirm("This will clear all dashboard data stored in this browser. Continue?")) return;
+        Object.assign(state, defaultState());
+        saveState();
+        renderAll();
+        showToast("All data cleared");
+      });
+
+      document.getElementById("resetPlanBtn").addEventListener("click", () => {
+        if (!confirm("Reset all 30/60/90 checkmarks?")) return;
+        state.plan = {};
+        saveState();
+        renderPlan();
+        showToast("Plan reset");
+      });
+
+      window.addEventListener("resize", () => {
+        window.clearTimeout(window.resizeDashTimer);
+        window.resizeDashTimer = window.setTimeout(renderAll, 120);
+      });
+    }
+
+    function setDefaultDates() {
+      ["dailyDate", "machineDate", "feedbackDate", "inventoryDate"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.value) el.value = todayISO();
+      });
+      const pill = document.getElementById("todayPill");
+      pill.textContent = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric", year: "numeric" });
+    }
+
+    setDefaultDates();
+    initEvents();
+    renderAll();
+  </script>
+</body>
+</html>
